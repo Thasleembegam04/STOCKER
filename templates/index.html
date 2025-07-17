@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stocker - Professional Stock Trading Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <span class="logo-icon">📈</span>
+                Stocker
+            </div>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item active" data-target="home">Home</li>
+                    <li class="nav-item" data-target="about">About</li>
+                    <li class="nav-item" data-target="services">Services</li>
+                </ul>
+            </nav>
+            
+            <div class="auth-buttons">
+                <a href="{{ url_for('login') }}" class="btn btn-secondary">Login</a>
+                <a href="{{ url_for('signup') }}" class="btn btn-primary">Sign Up</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="section active">
+            <div class="hero-content">
+                <h1>Welcome to Stocker</h1>
+                <p>The most advanced stock trading platform designed for both beginners and professional traders. Trade with confidence using our real-time market data and powerful analytics.</p>
+                
+                <div class="hero-features">
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h3>Real-Time Trading</h3>
+                            <p>Execute trades instantly with live market data updated every 10 seconds</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>Advanced Analytics</h3>
+                            <p>Make informed decisions with comprehensive portfolio tracking and trade history</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>Secure Platform</h3>
+                            <p>Your investments are protected with enterprise-grade security and encryption</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>Professional Tools</h3>
+                            <p>Access professional-grade trading tools designed for serious investors</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="cta-section">
+                    <h2>Start Trading Today</h2>
+                    <p>Join thousands of traders who trust Stocker for their investment needs</p>
+                    <div class="cta-buttons">
+                        <a href="{{ url_for('signup') }}" class="btn btn-primary">Get Started</a>
+                        <a href="{{ url_for('login') }}" class="btn btn-secondary">Login</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="section">
+            <div class="about-content">
+                <h2>About Stocker</h2>
+                <p>Stocker is a cutting-edge stock trading platform that combines powerful technology with user-friendly design to deliver an exceptional trading experience.</p>
+                
+                <div class="about-grid">
+                    <div class="about-section">
+                        <h3>Our Mission</h3>
+                        <p>To democratize stock trading by providing everyone with access to professional-grade trading tools and real-time market data.</p>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h3>Our Technology</h3>
+                        <p>Built with modern web technologies and secure cloud infrastructure to ensure fast, reliable, and secure trading experiences.</p>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h3>Our Team</h3>
+                        <p>Comprised of experienced traders, developers, and financial experts dedicated to creating the best trading platform possible.</p>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h3>Our Values</h3>
+                        <p>Transparency, security, innovation, and customer success are at the core of everything we do.</p>
+                    </div>
+                </div>
+                
+                <div class="statistics">
+                    <h3>Platform Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">10,000+</div>
+                            <div class="stat-label">Active Traders</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">$50M+</div>
+                            <div class="stat-label">Trading Volume</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">99.9%</div>
+                            <div class="stat-label">Uptime</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">24/7</div>
+                            <div class="stat-label">Support</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="services" class="section">
+            <div class="services-content">
+                <h2>Our Services</h2>
+                <p>Comprehensive trading solutions designed to meet all your investment needs.</p>
+                
+                <div class="services-grid">
+                    <div class="service-card">
+                        <h3>Stock Trading</h3>
+                        <p>Trade stocks from major exchanges with real-time pricing and instant execution.</p>
+                        <ul>
+                            <li>Real-time market data</li>
+                            <li>Instant trade execution</li>
+                            <li>Advanced order types</li>
+                            <li>Portfolio tracking</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="service-card">
+                        <h3>Portfolio Management</h3>
+                        <p>Comprehensive tools to track and manage your investment portfolio efficiently.</p>
+                        <ul>
+                            <li>Performance analytics</li>
+                            <li>Risk assessment</li>
+                            <li>Diversification insights</li>
+                            <li>Historical tracking</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="service-card">
+                        <h3>Market Analysis</h3>
+                        <p>Advanced analytics and insights to help you make informed trading decisions.</p>
+                        <ul>
+                            <li>Technical indicators</li>
+                            <li>Market trends</li>
+                            <li>Price alerts</li>
+                            <li>Research reports</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="service-card">
+                        <h3>Admin Dashboard</h3>
+                        <p>Comprehensive administrative tools for platform management and oversight.</p>
+                        <ul>
+                            <li>User management</li>
+                            <li>Trade monitoring</li>
+                            <li>System analytics</li>
+                            <li>Security controls</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="pricing-section">
+                    <h3>Pricing Plans</h3>
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <h4>Trader</h4>
+                            <div class="price">Free</div>
+                            <p>Perfect for individual traders</p>
+                            <ul>
+                                <li>Real-time trading</li>
+                                <li>Portfolio tracking</li>
+                                <li>Basic analytics</li>
+                                <li>Email support</li>
+                            </ul>
+                            <a href="{{ url_for('signup') }}" class="btn btn-primary">Get Started</a>
+                        </div>
+                        
+                        <div class="pricing-card premium">
+                            <h4>Admin</h4>
+                            <div class="price">Contact Us</div>
+                            <p>For platform administration</p>
+                            <ul>
+                                <li>All trader features</li>
+                                <li>User management</li>
+                                <li>Advanced analytics</li>
+                                <li>Priority support</li>
+                            </ul>
+                            <a href="{{ url_for('signup') }}" class="btn btn-primary">Contact Sales</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Stocker. All rights reserved. | Professional Stock Trading Platform</p>
+        </div>
+    </footer>
+</body>
+</html>

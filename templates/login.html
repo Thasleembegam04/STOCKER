@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Stocker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <span class="logo-icon">📈</span>
+                <a href="{{ url_for('index') }}" style="color: inherit; text-decoration: none;">Stocker</a>
+            </div>
+            
+            <div class="auth-buttons">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Home</a>
+                <a href="{{ url_for('signup') }}" class="btn btn-primary">Sign Up</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="form-container">
+            <h2>Welcome Back</h2>
+            <p style="text-align: center; color: #cccccc; margin-bottom: 2rem;">
+                Login to your Stocker account to continue trading
+            </p>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-error">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" id="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-container">
+                        <input type="password" id="password" name="password" required>
+                        <button type="button" class="password-toggle">👁️</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Login As</label>
+                    <select id="role" name="role" required>
+                        <option value="">Select Role</option>
+                        <option value="Trader">Trader</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                    Login
+                </button>
+            </form>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <p style="color: #cccccc;">
+                    Don't have an account? 
+                    <a href="{{ url_for('signup') }}" style="color: #00ff88; text-decoration: none;">Sign up here</a>
+                </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem; padding: 1rem; background-color: #2a2a2a; border-radius: 5px;">
+                <h4 style="color: #00ff88; margin-bottom: 1rem;">Demo Accounts</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
+                    <div>
+                        <strong style="color: #00ff88;">Trader Demo:</strong><br>
+                        Username: demo_trader<br>
+                        Password: Demo123!
+                    </div>
+                    <div>
+                        <strong style="color: #00ff88;">Admin Demo:</strong><br>
+                        Username: demo_admin<br>
+                        Password: Admin123!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Stocker. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

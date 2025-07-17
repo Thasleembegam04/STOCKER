@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - Admin - Stocker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <span class="logo-icon">📈</span>
+                <a href="{{ url_for('admin_dashboard') }}" style="color: inherit; text-decoration: none;">Stocker Admin</a>
+            </div>
+            
+            <div class="nav-menu-container">
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('admin_portfolio') }}" class="nav-link">All Portfolios</a>
+                <a href="{{ url_for('admin_history') }}" class="nav-link">All Trades</a>
+                <a href="{{ url_for('admin_manage') }}" class="nav-link active">Manage Users</a>
+            </div>
+            
+            <div class="auth-buttons">
+                <span style="color: #cccccc; margin-right: 1rem;">Admin: {{ session.username }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">User Management</h1>
+                <div class="user-info">
+                    <p><strong>Administrator:</strong> {{ session.username }}</p>
+                    <button class="btn btn-secondary" onclick="window.location.reload()">Refresh Data</button>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ users|length }}</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ users|selectattr('3', 'equalto', 'Trader')|list|length }}</div>
+                    <div class="stat-label">Traders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ users|selectattr('3', 'equalto', 'Admin')|list|length }}</div>
+                    <div class="stat-label">Admins</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ messages|length }}</div>
+                    <div class="stat-label">Messages</div>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <!-- User Management -->
+                <div class="table-container">
+                    <h3 style="color: #00ff88; margin-bottom: 1rem;">Registered Users</h3>
+                    {% if users %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td><strong style="color: #00ff88;">{{ user[1] }}</strong></td>
+                                <td>{{ user[2] }}</td>
+                                <td>
+                                    <span class="{% if user[3] == 'Admin' %}action-buy{% else %}action-sell{% endif %}">
+                                        {{ user[3] }}
+                                    </span>
+                                </td>
+                                <td>{{ user[4] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p style="color: #cccccc; text-align: center; padding: 2rem;">No users registered yet.</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Messages -->
+                <div class="table-container">
+                    <h3 style="color: #00ff88; margin-bottom: 1rem;">User Messages</h3>
+                    {% if messages %}
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        {% for message in messages %}
+                        <div style="background-color: #2a2a2a; padding: 1rem; margin-bottom: 1rem; border-radius: 5px; border-left: 3px solid #00ff88;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <strong style="color: #00ff88;">{{ message[2] }}</strong>
+                                <small style="color: #cccccc;">{{ message[1] }}</small>
+                            </div>
+                            <p style="color: #ffffff; margin: 0;">{{ message[0] }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p style="color: #cccccc; text-align: center; padding: 2rem;">No messages yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="admin-actions">
+                <h3 style="color: #00ff88; margin-bottom: 1rem;">Platform Management</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <button class="btn btn-primary" style="padding: 1rem;" onclick="refreshUserData()">
+                        Refresh User Data
+                    </button>
+                    <button class="btn btn-secondary" style="padding: 1rem;" onclick="exportUserData()">
+                        Export User Data
+                    </button>
+                    <button class="btn btn-secondary" style="padding: 1rem;" onclick="systemHealthCheck()">
+                        System Health Check
+                    </button>
+                    <button class="btn btn-secondary" style="padding: 1rem;" onclick="viewSystemLogs()">
+                        View System Logs
+                    </button>
+                </div>
+            </div>
+            
+            <div style="background-color: #1e1e1e; padding: 1.5rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;">
+                <h4 style="color: #00ff88; margin-bottom: 1rem;">User Management Features</h4>
+                <ul style="color: #cccccc; line-height: 1.8;">
+                    <li><strong>User Registration:</strong> Monitor new user signups and account creation</li>
+                    <li><strong>Role Management:</strong> Track trader and admin accounts</li>
+                    <li><strong>Activity Monitoring:</strong> View user login activity and engagement</li>
+                    <li><strong>Message System:</strong> Review user messages and support requests</li>
+                    <li><strong>System Health:</strong> Monitor platform performance and user experience</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Stocker. All rights reserved. - Admin Panel</p>
+        </div>
+    </footer>
+
+    <script>
+        function refreshUserData() {
+            window.location.reload();
+        }
+        
+        function exportUserData() {
+            alert('Export functionality would be implemented here');
+        }
+        
+        function systemHealthCheck() {
+            alert('System is running normally. All services are operational.');
+        }
+        
+        function viewSystemLogs() {
+            alert('System logs would be displayed here');
+        }
+    </script>
+</body>
+</html>

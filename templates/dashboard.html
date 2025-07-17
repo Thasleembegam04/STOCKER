@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Stocker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <span class="logo-icon">📈</span>
+                <a href="{{ url_for('dashboard') }}" style="color: inherit; text-decoration: none;">Stocker</a>
+            </div>
+            
+            <div class="nav-menu-container">
+                <a href="{{ url_for('dashboard') }}" class="nav-link active">Dashboard</a>
+                <a href="{{ url_for('trade') }}" class="nav-link">Trade</a>
+                <a href="{{ url_for('portfolio') }}" class="nav-link">Portfolio</a>
+                <a href="{{ url_for('history') }}" class="nav-link">History</a>
+            </div>
+            
+            <div class="auth-buttons">
+                <span style="color: #cccccc; margin-right: 1rem;">Welcome, {{ session.username }}!</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Trading Dashboard</h1>
+                <div class="user-info">
+                    <p><strong>Trader:</strong> {{ session.username }}</p>
+                    <p><strong>Email:</strong> {{ session.email }}</p>
+                </div>
+            </div>
+            
+            <div class="market-summary">
+                <h2 style="color: #00ff88; margin-bottom: 1rem;">Live Market Data</h2>
+                <p style="color: #cccccc; margin-bottom: 2rem;">
+                    Real-time stock prices updated every 10 seconds. Click Buy or Sell to execute trades instantly.
+                </p>
+            </div>
+            
+            <div class="stocks-grid">
+                {% for symbol, data in stocks.items() %}
+                <div class="stock-card" data-symbol="{{ symbol }}">
+                    <div class="stock-header">
+                        <div class="stock-symbol">{{ symbol }}</div>
+                        <div class="stock-price">${{ "%.2f"|format(data.price) }}</div>
+                    </div>
+                    <div class="stock-name">{{ data.name }}</div>
+                    <div class="stock-actions">
+                        <form method="GET" action="{{ url_for('trade') }}" style="display: inline; width: 48%; margin-right: 2%;">
+                            <input type="hidden" name="symbol" value="{{ symbol }}">
+                            <input type="hidden" name="action" value="buy">
+                            <button type="submit" class="btn-buy">Buy</button>
+                        </form>
+                        <form method="GET" action="{{ url_for('trade') }}" style="display: inline; width: 48%;">
+                            <input type="hidden" name="symbol" value="{{ symbol }}">
+                            <input type="hidden" name="action" value="sell">
+                            <button type="submit" class="btn-sell">Sell</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="trading-tips">
+                <h3 style="color: #00ff88; margin-bottom: 1rem;">Trading Tips</h3>
+                <div style="background-color: #1e1e1e; padding: 1.5rem; border-radius: 10px; border: 1px solid #333;">
+                    <ul style="color: #cccccc; line-height: 1.8;">
+                        <li>Prices update automatically every 10 seconds</li>
+                        <li>Use the Trade page for detailed order placement</li>
+                        <li>Monitor your Portfolio for performance tracking</li>
+                        <li>Check History for complete trade records</li>
+                        <li>No balance restrictions - trade freely for demonstration</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Stocker. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

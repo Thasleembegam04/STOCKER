@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Portfolios - Admin - Stocker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <span class="logo-icon">📈</span>
+                <a href="{{ url_for('admin_dashboard') }}" style="color: inherit; text-decoration: none;">Stocker Admin</a>
+            </div>
+            
+            <div class="nav-menu-container">
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('admin_portfolio') }}" class="nav-link active">All Portfolios</a>
+                <a href="{{ url_for('admin_history') }}" class="nav-link">All Trades</a>
+                <a href="{{ url_for('admin_manage') }}" class="nav-link">Manage Users</a>
+            </div>
+            
+            <div class="auth-buttons">
+                <span style="color: #cccccc; margin-right: 1rem;">Admin: {{ session.username }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">All User Portfolios</h1>
+                <div class="user-info">
+                    <p><strong>Administrator:</strong> {{ session.username }}</p>
+                    <button class="btn btn-secondary" onclick="window.location.reload()">Refresh Data</button>
+                </div>
+            </div>
+            
+            {% if portfolio %}
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ portfolio|groupby('username')|list|length }}</div>
+                    <div class="stat-label">Active Traders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ portfolio|length }}</div>
+                    <div class="stat-label">Total Holdings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${{ "%.2f"|format(portfolio|sum(attribute='total_value')) }}</div>
+                    <div class="stat-label">Total Portfolio Value</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ portfolio|sum(attribute='quantity') }}</div>
+                    <div class="stat-label">Total Shares</div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Trader</th>
+                            <th>Symbol</th>
+                            <th>Company</th>
+                            <th>Quantity</th>
+                            <th>Avg. Price</th>
+                            <th>Current Price</th>
+                            <th>Total Value</th>
+                            <th>P&L</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for holding in portfolio %}
+                        <tr>
+                            <td><strong style="color: #00ff88;">{{ holding.username }}</strong></td>
+                            <td>{{ holding.symbol }}</td>
+                            <td>{{ holding.name }}</td>
+                            <td>{{ holding.quantity }}</td>
+                            <td>${{ "%.2f"|format(holding.avg_price) }}</td>
+                            <td>${{ "%.2f"|format(holding.current_price) }}</td>
+                            <td>${{ "%.2f"|format(holding.total_value) }}</td>
+                            <td class="{% if holding.current_price > holding.avg_price %}portfolio-value positive{% elif holding.current_price < holding.avg_price %}portfolio-value negative{% else %}portfolio-value neutral{% endif %}">
+                                {% set pnl = (holding.current_price - holding.avg_price) * holding.quantity %}
+                                {% if pnl > 0 %}+{% endif %}${{ "%.2f"|format(pnl) }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="{{ url_for('admin_history') }}" class="btn btn-secondary">View All Trades</a>
+                <a href="{{ url_for('admin_manage') }}" class="btn btn-primary" style="margin-left: 1rem;">Manage Users</a>
+            </div>
+            
+            {% else %}
+            <div class="empty-state">
+                <h3>No Portfolio Data</h3>
+                <p>No users have made any trades yet.</p>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary" style="margin-top: 1rem;">Back to Dashboard</a>
+            </div>
+            {% endif %}
+            
+            <div style="background-color: #1e1e1e; padding: 1.5rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;">
+                <h4 style="color: #00ff88; margin-bottom: 1rem;">Portfolio Overview</h4>
+                <ul style="color: #cccccc; line-height: 1.8;">
+                    <li><strong>Real-time Values:</strong> All values update automatically every 10 seconds</li>
+                    <li><strong>P&L Calculation:</strong> Based on average purchase price vs current market price</li>
+                    <li><strong>Total Value:</strong> Current market value of all holdings</li>
+                    <li><strong>Trader Performance:</strong> Individual trader portfolio performance</li>
+                    <li>Green indicates profit, red indicates loss for each holding</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Stocker. All rights reserved. - Admin Panel</p>
+        </div>
+    </footer>
+</body>
+</html>
