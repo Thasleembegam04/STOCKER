@@ -483,18 +483,9 @@ def admin_manage():
         users = [(user['user_id'], user['username'], user['email'], user['role'], user['created_at']) 
                 for user in users_response['Items']]
         
-        # Get messages
-        messages_response = messages_table.scan()
-        user_lookup = {user['user_id']: user['username'] for user in users_response['Items']}
-        
-        messages = [(msg['message'], msg['created_at'], user_lookup.get(msg['user_id'], 'Unknown'))
-                   for msg in messages_response['Items']]
-        
-        return render_template('admin_manage.html', users=users, messages=messages)
-        
     except Exception as e:
         print(f"Admin manage error: {e}")
-        return render_template('admin_manage.html', users=[], messages=[])
+        return render_template('admin_manage.html', users=[])
 
 @app.route('/get_stock_prices')
 def get_stock_prices():
