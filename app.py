@@ -455,16 +455,8 @@ def admin_manage():
     cursor.execute('SELECT id, username, email, role, created_at FROM users ORDER BY created_at DESC')
     users = cursor.fetchall()
     
-    # Get messages
-    cursor.execute('''
-        SELECT m.message, m.created_at, u.username
-        FROM messages m JOIN users u ON m.user_id = u.id
-        ORDER BY m.created_at DESC
-    ''')
-    messages = cursor.fetchall()
-    
     conn.close()
-    return render_template('admin_manage.html', users=users, messages=messages)
+    return render_template('admin_manage.html', users=users)
 
 @app.route('/get_stock_prices')
 def get_stock_prices():
