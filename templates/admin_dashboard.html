@@ -5,140 +5,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Stocker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
-<body>
-    <header>
-        <div class="header-container">
-            <div class="logo">
-                <span class="logo-icon">📈</span>
-                <a href="{{ url_for('admin_dashboard') }}" style="color: inherit; text-decoration: none;">Stocker Admin</a>
-            </div>
-            
-            <div class="nav-menu-container">
-                <a href="{{ url_for('admin_dashboard') }}" class="nav-link active">Dashboard</a>
-                <a href="{{ url_for('admin_portfolio') }}" class="nav-link">All Portfolios</a>
-                <a href="{{ url_for('admin_history') }}" class="nav-link">All Trades</a>
-                <a href="{{ url_for('admin_manage') }}" class="nav-link">Manage Users</a>
-            </div>
-            
-            <div class="auth-buttons">
-                <span style="color: #cccccc; margin-right: 1rem;">Admin: {{ session.username }}</span>
-                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
-            </div>
+<body class="admin-page">
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/admin/dashboard" class="logo">Stocker Admin</a>
+                <div class="nav-links">
+                    <a href="/admin/dashboard" class="nav-link active">Dashboard</a>
+                    <a href="/admin/portfolio" class="nav-link">All Portfolios</a>
+                    <a href="/admin/history" class="nav-link">All Trades</a>
+                    <a href="/admin/manage" class="nav-link">Manage Users</a>
+                    <a href="/logout" class="nav-link">Logout ({{ session.username }})</a>
+                </div>
+            </nav>
         </div>
     </header>
 
-    <main>
-        <div class="dashboard-container admin-dashboard">
-            <div class="dashboard-header">
-                <h1 class="dashboard-title">Admin Dashboard</h1>
-                <div class="user-info">
-                    <p><strong>Platform Administrator:</strong> {{ session.username }}</p>
-                    <p><strong>Access Level:</strong> Full System Access</p>
+    <main class="main-content">
+        <div class="container">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h1 class="card-title">Admin Dashboard</h1>
+                    <div class="text-secondary">Platform overview and statistics</div>
                 </div>
             </div>
-            
-            <div class="stats-grid">
+
+            <div class="stats-grid mb-4">
                 <div class="stat-card">
-                    <div class="stat-value">{{ total_traders }}</div>
-                    <div class="stat-label">Total Traders</div>
+                    <div class="stat-value">{{ total_users }}</div>
+                    <div class="stat-label">Total Users</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">{{ total_trades }}</div>
                     <div class="stat-label">Total Trades</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">${{ "%.2f"|format(total_portfolio_value) }}</div>
-                    <div class="stat-label">Total Portfolio Value</div>
+                    <div class="stat-value">${{ "%.2f"|format(total_volume) }}</div>
+                    <div class="stat-label">Trading Volume</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">21</div>
-                    <div class="stat-label">Active Stocks</div>
+                    <div class="stat-value">${{ "%.2f"|format(total_cash) }}</div>
+                    <div class="stat-label">Total Cash</div>
                 </div>
             </div>
-            
-            <div class="admin-overview">
-                <h2 style="color: #00ff88; margin-bottom: 1rem;">System Overview</h2>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                    <div class="stat-card">
-                        <h3 style="color: #00ff88; margin-bottom: 1rem;">Platform Health</h3>
-                        <div class="summary-row">
-                            <span class="summary-label">System Status:</span>
-                            <span class="summary-value" style="color: #00ff88;">Online</span>
-                        </div>
-                        <div class="summary-row">
-                            <span class="summary-label">Database:</span>
-                            <span class="summary-value" style="color: #00ff88;">Connected</span>
-                        </div>
-                        <div class="summary-row">
-                            <span class="summary-label">Real-time Updates:</span>
-                            <span class="summary-value" style="color: #00ff88;">Active</span>
-                        </div>
-                        <div class="summary-row">
-                            <span class="summary-label">Last Update:</span>
-                            <span class="summary-value">{{ "Now"|string }}</span>
-                        </div>
+
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Quick Actions</h3>
                     </div>
-                    
-                    <div class="stat-card">
-                        <h3 style="color: #00ff88; margin-bottom: 1rem;">Trading Activity</h3>
-                        <div class="summary-row">
-                            <span class="summary-label">Active Sessions:</span>
-                            <span class="summary-value">{{ total_traders }}</span>
-                        </div>
-                        <div class="summary-row">
-                            <span class="summary-label">Today's Trades:</span>
-                            <span class="summary-value">{{ total_trades }}</span>
-                        </div>
-                        <div class="summary-row">
-                            <span class="summary-label">Avg. Trade Size:</span>
-                            <span class="summary-value">${{ "%.2f"|format(total_portfolio_value / total_trades if total_trades > 0 else 0) }}</span>
-                        </div>
-                        <div class="summary-row">
-                            <span class="summary-label">Platform Uptime:</span>
-                            <span class="summary-value">99.9%</span>
-                        </div>
+                    <div class="grid grid-2" style="gap: 1rem;">
+                        <a href="/admin/portfolio" class="btn btn-primary">
+                            📊 View All Portfolios
+                        </a>
+                        <a href="/admin/history" class="btn btn-secondary">
+                            📈 View All Trades
+                        </a>
+                        <a href="/admin/manage" class="btn btn-warning">
+                            👥 Manage Users
+                        </a>
+                        <a href="/dashboard" class="btn btn-success">
+                            🔄 Switch to User View
+                        </a>
                     </div>
                 </div>
-            </div>
-            
-            <div class="admin-actions">
-                <h2 style="color: #00ff88; margin-bottom: 1rem;">Quick Actions</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                    <a href="{{ url_for('admin_portfolio') }}" class="btn btn-primary" style="padding: 1rem; text-align: center;">
-                        View All Portfolios
-                    </a>
-                    <a href="{{ url_for('admin_history') }}" class="btn btn-primary" style="padding: 1rem; text-align: center;">
-                        View All Trades
-                    </a>
-                    <a href="{{ url_for('admin_manage') }}" class="btn btn-primary" style="padding: 1rem; text-align: center;">
-                        Manage Users
-                    </a>
-                    <button class="btn btn-secondary" style="padding: 1rem;" onclick="window.location.reload()">
-                        Refresh Data
-                    </button>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Platform Status</h3>
+                    </div>
+                    <div style="space-y: 1rem;">
+                        <div class="d-flex justify-between align-center p-2" style="background: var(--secondary-bg); border-radius: 0.5rem;">
+                            <span>Market Data</span>
+                            <span class="text-success">● Live</span>
+                        </div>
+                        <div class="d-flex justify-between align-center p-2" style="background: var(--secondary-bg); border-radius: 0.5rem;">
+                            <span>Trading System</span>
+                            <span class="text-success">● Active</span>
+                        </div>
+                        <div class="d-flex justify-between align-center p-2" style="background: var(--secondary-bg); border-radius: 0.5rem;">
+                            <span>User Registration</span>
+                            <span class="text-success">● Open</span>
+                        </div>
+                        <div class="d-flex justify-between align-center p-2" style="background: var(--secondary-bg); border-radius: 0.5rem;">
+                            <span>Database</span>
+                            <span class="text-success">● Connected</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div style="background-color: #1e1e1e; padding: 1.5rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;">
-                <h4 style="color: #00ff88; margin-bottom: 1rem;">Administrator Privileges</h4>
-                <ul style="color: #cccccc; line-height: 1.8;">
-                    <li><strong>Full System Access:</strong> Monitor all platform activities</li>
-                    <li><strong>User Management:</strong> View and manage all user accounts</li>
-                    <li><strong>Portfolio Oversight:</strong> Monitor all trader portfolios</li>
-                    <li><strong>Trade Monitoring:</strong> View all platform trades in real-time</li>
-                    <li><strong>System Analytics:</strong> Access comprehensive platform metrics</li>
-                </ul>
+
+            <div class="alert alert-warning">
+                <strong>Admin Notice:</strong> You are currently viewing the admin dashboard. 
+                All user data and trading activities are visible from this interface. 
+                Use these tools responsibly to maintain platform integrity.
             </div>
         </div>
     </main>
 
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2025 Stocker. All rights reserved. - Admin Panel</p>
-        </div>
-    </footer>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
