@@ -5,123 +5,127 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trade History - Stocker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
-    <header>
-        <div class="header-container">
-            <div class="logo">
-                <span class="logo-icon">📈</span>
-                <a href="{{ url_for('dashboard') }}" style="color: inherit; text-decoration: none;">Stocker</a>
-            </div>
-            
-            <div class="nav-menu-container">
-                <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
-                <a href="{{ url_for('trade') }}" class="nav-link">Trade</a>
-                <a href="{{ url_for('portfolio') }}" class="nav-link">Portfolio</a>
-                <a href="{{ url_for('history') }}" class="nav-link active">History</a>
-            </div>
-            
-            <div class="auth-buttons">
-                <span style="color: #cccccc; margin-right: 1rem;">Welcome, {{ session.username }}!</span>
-                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
-            </div>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/dashboard" class="logo">Stocker</a>
+                <div class="nav-links">
+                    <a href="/dashboard" class="nav-link">Dashboard</a>
+                    <a href="/portfolio" class="nav-link">Portfolio</a>
+                    <a href="/history" class="nav-link active">History</a>
+                    <a href="/logout" class="nav-link">Logout ({{ session.username }})</a>
+                </div>
+            </nav>
         </div>
     </header>
 
-    <main>
-        <div class="dashboard-container">
-            <div class="dashboard-header">
-                <h1 class="dashboard-title">Trade History</h1>
-                <div class="user-info">
-                    <p><strong>Trader:</strong> {{ session.username }}</p>
-                    <a href="{{ url_for('trade') }}" class="btn btn-primary">Make New Trade</a>
+    <main class="main-content">
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Trade History</h2>
+                    <div class="text-secondary">Your complete trading activity</div>
                 </div>
+
+                {% if trades %}
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Symbol</th>
+                                    <th>Action</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for trade in trades %}
+                                <tr>
+                                    <td>
+                                        <div style="font-size: 0.875rem;">
+                                            <div>{{ trade[5][:10] }}</div>
+                                            <div class="text-muted">{{ trade[5][11:19] }}</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>{{ trade[0] }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="btn btn-sm {% if trade[1] == 'buy' %}btn-success{% else %}btn-danger{% endif %}">
+                                            {{ trade[1].upper() }}
+                                        </span>
+                                    </td>
+                                    <td>{{ trade[2] }}</td>
+                                    <td>${{ "%.2f"|format(trade[3]) }}</td>
+                                    <td>
+                                        <strong>${{ "%.2f"|format(trade[4]) }}</strong>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="grid grid-3 mt-4">
+                        <div class="stat-card">
+                            <div class="stat-value">{{ trades|length }}</div>
+                            <div class="stat-label">Total Trades</div>
+                        </div>
+                        <div class="stat-card">
+                            {% set buy_trades = trades | selectattr('1', 'equalto', 'buy') | list %}
+                            <div class="stat-value">{{ buy_trades|length }}</div>
+                            <div class="stat-label">Buy Orders</div>
+                        </div>
+                        <div class="stat-card">
+                            {% set sell_trades = trades | selectattr('1', 'equalto', 'sell') | list %}
+                            <div class="stat-value">{{ sell_trades|length }}</div>
+                            <div class="stat-label">Sell Orders</div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center p-4">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📈</div>
+                        <h3>No Trading History</h3>
+                        <p class="text-secondary mb-4">You haven't made any trades yet. Start trading to see your history here.</p>
+                        <a href="/dashboard" class="btn btn-primary">Start Trading</a>
+                    </div>
+                {% endif %}
             </div>
-            
-            {% if history %}
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">{{ history|length }}</div>
-                    <div class="stat-label">Total Trades</div>
+
+            {% if trades %}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Activity</h3>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ history|selectattr('action', 'equalto', 'buy')|list|length }}</div>
-                    <div class="stat-label">Buy Orders</div>
+                <div>
+                    {% for trade in trades[:5] %}
+                    <div class="portfolio-item">
+                        <div class="portfolio-info">
+                            <div class="portfolio-symbol">
+                                {{ trade[1].upper() }} {{ trade[0] }}
+                            </div>
+                            <div class="portfolio-details">
+                                {{ trade[2] }} shares at ${{ "%.2f"|format(trade[3]) }} each
+                            </div>
+                        </div>
+                        <div class="portfolio-value">
+                            <div class="portfolio-price">${{ "%.2f"|format(trade[4]) }}</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">
+                                {{ trade[5][:10] }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ history|selectattr('action', 'equalto', 'sell')|list|length }}</div>
-                    <div class="stat-label">Sell Orders</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${{ "%.2f"|format(history|sum(attribute='total_amount')) }}</div>
-                    <div class="stat-label">Total Volume</div>
-                </div>
-            </div>
-            
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Date/Time</th>
-                            <th>Symbol</th>
-                            <th>Company</th>
-                            <th>Action</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Total Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for trade in history %}
-                        <tr>
-                            <td>{{ trade.trade_date }}</td>
-                            <td><strong style="color: #00ff88;">{{ trade.symbol }}</strong></td>
-                            <td>{{ trade.name }}</td>
-                            <td>
-                                <span class="action-{{ trade.action }}">
-                                    {{ trade.action.upper() }}
-                                </span>
-                            </td>
-                            <td>{{ trade.quantity }}</td>
-                            <td>${{ "%.2f"|format(trade.price) }}</td>
-                            <td>${{ "%.2f"|format(trade.total_amount) }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            
-            <div style="text-align: center; margin-top: 2rem;">
-                <a href="{{ url_for('portfolio') }}" class="btn btn-secondary">View Portfolio</a>
-                <a href="{{ url_for('trade') }}" class="btn btn-primary" style="margin-left: 1rem;">Make New Trade</a>
-            </div>
-            
-            {% else %}
-            <div class="empty-state">
-                <h3>No Trade History</h3>
-                <p>You haven't made any trades yet. Start by making your first trade!</p>
-                <a href="{{ url_for('trade') }}" class="btn btn-primary" style="margin-top: 1rem;">Start Trading</a>
             </div>
             {% endif %}
-            
-            <div style="background-color: #1e1e1e; padding: 1.5rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;">
-                <h4 style="color: #00ff88; margin-bottom: 1rem;">Trade History Information</h4>
-                <ul style="color: #cccccc; line-height: 1.8;">
-                    <li><strong>Buy Orders:</strong> Purchases of stock shares</li>
-                    <li><strong>Sell Orders:</strong> Sales of stock shares</li>
-                    <li><strong>Price:</strong> Execution price at time of trade</li>
-                    <li><strong>Total Amount:</strong> Price × Quantity for the trade</li>
-                    <li>All trades are listed from newest to oldest</li>
-                </ul>
-            </div>
         </div>
     </main>
 
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2025 Stocker. All rights reserved.</p>
-        </div>
-    </footer>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
