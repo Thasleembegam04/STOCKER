@@ -5,90 +5,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Stocker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
-<body>
-    <header>
-        <div class="header-container">
-            <div class="logo">
-                <span class="logo-icon">📈</span>
-                <a href="{{ url_for('dashboard') }}" style="color: inherit; text-decoration: none;">Stocker</a>
-            </div>
-            
-            <div class="nav-menu-container">
-                <a href="{{ url_for('dashboard') }}" class="nav-link active">Dashboard</a>
-                <a href="{{ url_for('trade') }}" class="nav-link">Trade</a>
-                <a href="{{ url_for('portfolio') }}" class="nav-link">Portfolio</a>
-                <a href="{{ url_for('history') }}" class="nav-link">History</a>
-            </div>
-            
-            <div class="auth-buttons">
-                <span style="color: #cccccc; margin-right: 1rem;">Welcome, {{ session.username }}!</span>
-                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
-            </div>
+<body data-user-id="{{ session.user_id }}">
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/dashboard" class="logo">Stocker</a>
+                <div class="nav-links">
+                    <a href="/dashboard" class="nav-link active">Dashboard</a>
+                    <a href="/portfolio" class="nav-link">Portfolio</a>
+                    <a href="/history" class="nav-link">History</a>
+                    <a href="/logout" class="nav-link">Logout ({{ session.username }})</a>
+                </div>
+            </nav>
         </div>
     </header>
 
-    <main>
-        <div class="dashboard-container">
-            <div class="dashboard-header">
-                <h1 class="dashboard-title">Trading Dashboard</h1>
-                <div class="user-info">
-                    <p><strong>Trader:</strong> {{ session.username }}</p>
-                    <p><strong>Email:</strong> {{ session.email }}</p>
+    <main class="main-content">
+        <div class="container">
+            <div class="stats-grid mb-4">
+                <div class="stat-card">
+                    <div class="stat-value">${{ "%.2f"|format(balance) }}</div>
+                    <div class="stat-label">Available Balance</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="portfolio-value">${{ "%.2f"|format(portfolio_value) }}</div>
+                    <div class="stat-label">Portfolio Value</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${{ "%.2f"|format(balance + portfolio_value) }}</div>
+                    <div class="stat-label">Total Value</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ stocks|length }}</div>
+                    <div class="stat-label">Available Stocks</div>
                 </div>
             </div>
-            
-            <div class="market-summary">
-                <h2 style="color: #00ff88; margin-bottom: 1rem;">Live Market Data</h2>
-                <p style="color: #cccccc; margin-bottom: 2rem;">
-                    Real-time stock prices updated every 10 seconds. Click Buy or Sell to execute trades instantly.
-                </p>
-            </div>
-            
-            <div class="stocks-grid">
-                {% for symbol, data in stocks.items() %}
-                <div class="stock-card" data-symbol="{{ symbol }}">
-                    <div class="stock-header">
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Stock Market</h2>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">
+                        <div class="loading"></div>
+                        Live Updates
+                    </div>
+                </div>
+
+                <div class="grid grid-4">
+                    {% for symbol, stock in stocks.items() %}
+                    <div class="stock-card" data-symbol="{{ symbol }}">
                         <div class="stock-symbol">{{ symbol }}</div>
-                        <div class="stock-price">${{ "%.2f"|format(data.price) }}</div>
+                        <div class="stock-name">{{ stock.name }}</div>
+                        <div class="stock-price">${{ "%.2f"|format(stock.price) }}</div>
+                        <div class="stock-change {% if stock.change >= 0 %}positive{% else %}negative{% endif %}">
+                            {{ "+" if stock.change >= 0 else "" }}${{ "%.2f"|format(stock.change) }}
+                        </div>
                     </div>
-                    <div class="stock-name">{{ data.name }}</div>
-                    <div class="stock-actions">
-                        <form method="GET" action="{{ url_for('trade') }}" style="display: inline; width: 48%; margin-right: 2%;">
-                            <input type="hidden" name="symbol" value="{{ symbol }}">
-                            <input type="hidden" name="action" value="buy">
-                            <button type="submit" class="btn-buy">Buy</button>
-                        </form>
-                        <form method="GET" action="{{ url_for('trade') }}" style="display: inline; width: 48%;">
-                            <input type="hidden" name="symbol" value="{{ symbol }}">
-                            <input type="hidden" name="action" value="sell">
-                            <button type="submit" class="btn-sell">Sell</button>
-                        </form>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            
-            <div class="trading-tips">
-                <h3 style="color: #00ff88; margin-bottom: 1rem;">Trading Tips</h3>
-                <div style="background-color: #1e1e1e; padding: 1.5rem; border-radius: 10px; border: 1px solid #333;">
-                    <ul style="color: #cccccc; line-height: 1.8;">
-                        <li>Prices update automatically every 10 seconds</li>
-                        <li>Use the Trade page for detailed order placement</li>
-                        <li>Monitor your Portfolio for performance tracking</li>
-                        <li>Check History for complete trade records</li>
-                        <li>No balance restrictions - trade freely for demonstration</li>
-                    </ul>
+                    {% endfor %}
                 </div>
             </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Quick Actions</h2>
+                </div>
+                <div class="grid grid-3">
+                    <a href="/portfolio" class="btn btn-secondary btn-lg">
+                        📊 View Portfolio
+                    </a>
+                    <a href="/history" class="btn btn-secondary btn-lg">
+                        📈 Trade History
+                    </a>
+                    <div>
+                        <select id="quick-trade-select" class="form-input" onchange="quickTrade(this.value)">
+                            <option value="">Select Stock to Trade</option>
+                            {% for symbol, stock in stocks.items() %}
+                            <option value="{{ symbol }}">{{ symbol }} - {{ stock.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            {% if balance < 1000 %}
+            <div class="alert alert-warning">
+                <strong>Low Balance:</strong> Your account balance is getting low. Consider selling some positions to free up funds for new trades.
+            </div>
+            {% endif %}
         </div>
     </main>
 
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2025 Stocker. All rights reserved.</p>
-        </div>
-    </footer>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        function quickTrade(symbol) {
+            if (symbol) {
+                window.location.href = `/trade/${symbol}`;
+            }
+        }
+    </script>
 </body>
 </html>
