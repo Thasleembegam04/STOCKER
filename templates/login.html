@@ -5,88 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Stocker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <nav class="nav">
-                <a href="/" class="logo">Stocker</a>
-                <div class="nav-links">
-                    <a href="/" class="nav-link">Home</a>
-                    <a href="/signup" class="nav-link">Sign Up</a>
-                    <a href="/login" class="nav-link active">Login</a>
-                </div>
-            </nav>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <span class="logo-icon">📈</span>
+                <a href="{{ url_for('index') }}" style="color: inherit; text-decoration: none;">Stocker</a>
+            </div>
+            
+            <div class="auth-buttons">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Home</a>
+                <a href="{{ url_for('signup') }}" class="btn btn-primary">Sign Up</a>
+            </div>
         </div>
     </header>
 
-    <main class="main-content">
-        <div class="container">
-            <div style="max-width: 400px; margin: 0 auto;">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title text-center">Welcome Back</h2>
-                        <p class="text-center text-secondary">Login to your Stocker account</p>
+    <main>
+        <div class="form-container">
+            <h2>Welcome Back</h2>
+            <p style="text-align: center; color: #cccccc; margin-bottom: 2rem;">
+                Login to your Stocker account to continue trading
+            </p>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-error">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" id="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-container">
+                        <input type="password" id="password" name="password" required>
+                        <button type="button" class="password-toggle">👁️</button>
                     </div>
-
-                    {% with messages = get_flashed_messages() %}
-                        {% if messages %}
-                            {% for message in messages %}
-                                <div class="alert alert-danger">{{ message }}</div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-
-                    <form method="POST" class="fade-in">
-                        <div class="form-group">
-                            <label for="username" class="form-label">Username</label>
-                            <input 
-                                type="text" 
-                                id="username" 
-                                name="username" 
-                                class="form-input" 
-                                required
-                                placeholder="Enter your username"
-                            >
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password" class="form-label">Password</label>
-                            <input 
-                                type="password" 
-                                id="password" 
-                                name="password" 
-                                class="form-input" 
-                                required
-                                placeholder="Enter your password"
-                            >
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-full btn-lg">Login</button>
-                    </form>
-
-                    <div class="text-center mt-4">
-                        <p class="text-secondary">
-                            Don't have an account? 
-                            <a href="/signup" style="color: var(--accent-color); text-decoration: none;">Sign up here</a>
-                        </p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Login As</label>
+                    <select id="role" name="role" required>
+                        <option value="">Select Role</option>
+                        <option value="Trader">Trader</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                    Login
+                </button>
+            </form>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <p style="color: #cccccc;">
+                    Don't have an account? 
+                    <a href="{{ url_for('signup') }}" style="color: #00ff88; text-decoration: none;">Sign up here</a>
+                </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem; padding: 1rem; background-color:  #5d18dce0; border-radius: 5px;">
+                <h4 style="color: #ece0e0ee; margin-bottom: 1rem;">Demo Accounts</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
+                    <div>
+                        <strong style="color:  #ece0e0ee;">Trader Demo:</strong><br>
+                        Username: demo_trader<br>
+                        Password: Demo123!
                     </div>
-
-                    <div class="card mt-4" style="background: var(--secondary-bg);">
-                        <h4 style="margin-bottom: 1rem;">Demo Accounts</h4>
-                        <div style="font-size: 0.875rem; color: var(--text-secondary);">
-                            <p><strong>Getting Started:</strong></p>
-                            <p>• Create a new account with your preferred role</p>
-                            <p>• Trader accounts get $10,000 starting balance</p>
-                            <p>• Admin accounts have full platform access</p>
-                            <p>• All accounts start with the same privileges based on role</p>
-                        </div>
+                    <div>
+                        <strong style="color:  #ece0e0ee;">Admin Demo:</strong><br>
+                        Username: demo_admin<br>
+                        Password: Admin123!
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Stocker. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>
