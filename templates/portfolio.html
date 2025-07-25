@@ -5,124 +5,138 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio - Stocker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
-    <header>
-        <div class="header-container">
-            <div class="logo">
-                <span class="logo-icon">📈</span>
-                <a href="{{ url_for('dashboard') }}" style="color: inherit; text-decoration: none;">Stocker</a>
-            </div>
-            
-            <div class="nav-menu-container">
-                <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
-                <a href="{{ url_for('trade') }}" class="nav-link">Trade</a>
-                <a href="{{ url_for('portfolio') }}" class="nav-link active">Portfolio</a>
-                <a href="{{ url_for('history') }}" class="nav-link">History</a>
-            </div>
-            
-            <div class="auth-buttons">
-                <span style="color: #cccccc; margin-right: 1rem;">Welcome, {{ session.username }}!</span>
-                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
-            </div>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/dashboard" class="logo">Stocker</a>
+                <div class="nav-links">
+                    <a href="/dashboard" class="nav-link">Dashboard</a>
+                    <a href="/portfolio" class="nav-link active">Portfolio</a>
+                    <a href="/history" class="nav-link">History</a>
+                    <a href="/logout" class="nav-link">Logout ({{ session.username }})</a>
+                </div>
+            </nav>
         </div>
     </header>
 
-    <main>
-        <div class="dashboard-container">
-            <div class="dashboard-header">
-                <h1 class="dashboard-title">My Portfolio</h1>
-                <div class="user-info">
-                    <p><strong>Trader:</strong> {{ session.username }}</p>
-                    <a href="{{ url_for('trade') }}" class="btn btn-primary">Make New Trade</a>
+    <main class="main-content">
+        <div class="container">
+            <div class="stats-grid mb-4">
+                <div class="stat-card">
+                    <div class="stat-value">${{ "%.2f"|format(balance) }}</div>
+                    <div class="stat-label">Cash Balance</div>
                 </div>
-            </div>
-            
-            {% if portfolio %}
-            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">${{ "%.2f"|format(portfolio_value) }}</div>
+                    <div class="stat-label">Portfolio Value</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${{ "%.2f"|format(total_value) }}</div>
+                    <div class="stat-label">Total Value</div>
+                </div>
                 <div class="stat-card">
                     <div class="stat-value">{{ portfolio|length }}</div>
                     <div class="stat-label">Holdings</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">${{ "%.2f"|format(portfolio|sum(attribute='total_value')) }}</div>
-                    <div class="stat-label">Total Value</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ portfolio|sum(attribute='quantity') }}</div>
-                    <div class="stat-label">Total Shares</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${{ "%.2f"|format(portfolio|sum(attribute='total_value') / portfolio|sum(attribute='quantity')) }}</div>
-                    <div class="stat-label">Avg. Price</div>
-                </div>
             </div>
-            
-            <div class="table-container">
-                <table class="table portfolio-table">
-                    <thead>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Company</th>
-                            <th>Quantity</th>
-                            <th>Avg. Price</th>
-                            <th>Current Price</th>
-                            <th>Total Value</th>
-                            <th>P&L</th>
-                            <th>Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for holding in portfolio %}
-                        <tr class="portfolio-row" data-symbol="{{ holding.symbol }}" data-quantity="{{ holding.quantity }}">
-                            <td><strong style="color: #00ff88;">{{ holding.symbol }}</strong></td>
-                            <td>{{ holding.name }}</td>
-                            <td>{{ holding.quantity }}</td>
-                            <td>${{ "%.2f"|format(holding.avg_price) }}</td>
-                            <td class="current-price">${{ "%.2f"|format(holding.current_price) }}</td>
-                            <td class="total-value">${{ "%.2f"|format(holding.total_value) }}</td>
-                            <td class="{% if holding.current_price > holding.avg_price %}portfolio-value positive{% elif holding.current_price < holding.avg_price %}portfolio-value negative{% else %}portfolio-value neutral{% endif %}">
-                                {% set pnl = (holding.current_price - holding.avg_price) * holding.quantity %}
-                                {% if pnl > 0 %}+{% endif %}${{ "%.2f"|format(pnl) }}
-                            </td>
-                            <td>{{ holding.last_purchase or holding.last_updated }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Your Holdings</h2>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">
+                        <div class="loading"></div>
+                        Live Updates
+                    </div>
+                </div>
+
+                {% if portfolio %}
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Company</th>
+                                    <th>Shares</th>
+                                    <th>Avg Price</th>
+                                    <th>Current Price</th>
+                                    <th>Total Value</th>
+                                    <th>Gain/Loss</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for holding in portfolio %}
+                                <tr class="portfolio-item" 
+                                    data-symbol="{{ holding.symbol }}" 
+                                    data-quantity="{{ holding.quantity }}"
+                                    data-avg-price="{{ holding.avg_price }}">
+                                    <td>
+                                        <strong>{{ holding.symbol }}</strong>
+                                    </td>
+                                    <td class="text-secondary">{{ holding.name }}</td>
+                                    <td>{{ holding.quantity }}</td>
+                                    <td>${{ "%.2f"|format(holding.avg_price) }}</td>
+                                    <td class="portfolio-price">${{ "%.2f"|format(holding.current_price) }}</td>
+                                    <td>
+                                        <strong>${{ "%.2f"|format(holding.total_value) }}</strong>
+                                    </td>
+                                    <td class="portfolio-change {% if holding.gain_loss >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ "+" if holding.gain_loss >= 0 else "" }}${{ "%.2f"|format(holding.gain_loss) }}
+                                    </td>
+                                    <td>
+                                        <a href="/trade/{{ holding.symbol }}" class="btn btn-primary btn-sm">Trade</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center p-4">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                        <h3>No Holdings Yet</h3>
+                        <p class="text-secondary mb-4">Start building your portfolio by purchasing stocks</p>
+                        <a href="/dashboard" class="btn btn-primary">Start Trading</a>
+                    </div>
+                {% endif %}
             </div>
-            
-            <div style="text-align: center; margin-top: 2rem;">
-                <a href="{{ url_for('history') }}" class="btn btn-secondary">View Trade History</a>
-                <a href="{{ url_for('trade') }}" class="btn btn-primary" style="margin-left: 1rem;">Make New Trade</a>
-            </div>
-            
-            {% else %}
-            <div class="empty-state">
-                <h3>No Holdings Yet</h3>
-                <p>You haven't made any trades yet. Start by buying your first stock!</p>
-                <a href="{{ url_for('trade') }}" class="btn btn-primary" style="margin-top: 1rem;">Start Trading</a>
+
+            {% if portfolio %}
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Portfolio Performance</h3>
+                    </div>
+                    <div class="stat-card">
+                        {% set total_gain_loss = portfolio_value - (portfolio | sum(attribute='avg_price') * portfolio | sum(attribute='quantity')) %}
+                        <div class="stat-value {% if total_gain_loss >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            {{ "+" if total_gain_loss >= 0 else "" }}${{ "%.2f"|format(total_gain_loss) }}
+                        </div>
+                        <div class="stat-label">Total Gain/Loss</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Top Performer</h3>
+                    </div>
+                    {% if portfolio %}
+                        {% set best_stock = portfolio | sort(attribute='gain_loss', reverse=True) | first %}
+                        <div class="stat-card">
+                            <div class="stat-value">{{ best_stock.symbol }}</div>
+                            <div class="stat-label text-success">
+                                +${{ "%.2f"|format(best_stock.gain_loss) }} gain
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
             {% endif %}
-            
-            <div style="background-color: #1e1e1e; padding: 1.5rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;">
-                <h4 style="color: #00ff88; margin-bottom: 1rem;">Portfolio Information</h4>
-                <ul style="color: #cccccc; line-height: 1.8;">
-                    <li><strong>Current Price:</strong> Real-time market price (updates every 10 seconds)</li>
-                    <li><strong>Total Value:</strong> Current price × quantity owned</li>
-                    <li><strong>P&L:</strong> Profit/Loss based on average purchase price vs current price</li>
-                    <li><strong>Avg. Price:</strong> Average price of all purchases for this stock</li>
-                    <li>Green values indicate profit, red values indicate loss</li>
-                </ul>
-            </div>
         </div>
     </main>
 
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2025 Stocker. All rights reserved.</p>
-        </div>
-    </footer>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
