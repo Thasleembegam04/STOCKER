@@ -5,125 +5,148 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Trades - Admin - Stocker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
-<body>
-    <header>
-        <div class="header-container">
-            <div class="logo">
-                <span class="logo-icon">📈</span>
-                <a href="{{ url_for('admin_dashboard') }}" style="color: inherit; text-decoration: none;">Stocker Admin</a>
-            </div>
-            
-            <div class="nav-menu-container">
-                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Dashboard</a>
-                <a href="{{ url_for('admin_portfolio') }}" class="nav-link">All Portfolios</a>
-                <a href="{{ url_for('admin_history') }}" class="nav-link active">All Trades</a>
-                <a href="{{ url_for('admin_manage') }}" class="nav-link">Manage Users</a>
-            </div>
-            
-            <div class="auth-buttons">
-                <span style="color: #cccccc; margin-right: 1rem;">Admin: {{ session.username }}</span>
-                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
-            </div>
+<body class="admin-page">
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/admin/dashboard" class="logo">Stocker Admin</a>
+                <div class="nav-links">
+                    <a href="/admin/dashboard" class="nav-link">Dashboard</a>
+                    <a href="/admin/portfolio" class="nav-link">All Portfolios</a>
+                    <a href="/admin/history" class="nav-link active">All Trades</a>
+                    <a href="/admin/manage" class="nav-link">Manage Users</a>
+                    <a href="/logout" class="nav-link">Logout ({{ session.username }})</a>
+                </div>
+            </nav>
         </div>
     </header>
 
-    <main>
-        <div class="dashboard-container">
-            <div class="dashboard-header">
-                <h1 class="dashboard-title">All Platform Trades</h1>
-                <div class="user-info">
-                    <p><strong>Administrator:</strong> {{ session.username }}</p>
-                    <button class="btn btn-secondary" onclick="window.location.reload()">Refresh Data</button>
+    <main class="main-content">
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">All Trading Activity</h2>
+                    <div class="text-secondary">Complete platform trading history (last 100 trades)</div>
                 </div>
+
+                {% if trades %}
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>User</th>
+                                    <th>Symbol</th>
+                                    <th>Action</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for trade in trades %}
+                                <tr>
+                                    <td>
+                                        <div style="font-size: 0.875rem;">
+                                            <div>{{ trade[6][:10] }}</div>
+                                            <div class="text-muted">{{ trade[6][11:19] }}</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>{{ trade[0] }}</strong>
+                                    </td>
+                                    <td>
+                                        <strong>{{ trade[1] }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="btn btn-sm {% if trade[2] == 'buy' %}btn-success{% else %}btn-danger{% endif %}">
+                                            {{ trade[2].upper() }}
+                                        </span>
+                                    </td>
+                                    <td>{{ trade[3] }}</td>
+                                    <td>${{ "%.2f"|format(trade[4]) }}</td>
+                                    <td>
+                                        <strong>${{ "%.2f"|format(trade[5]) }}</strong>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="grid grid-4 mt-4">
+                        <div class="stat-card">
+                            <div class="stat-value">{{ trades|length }}</div>
+                            <div class="stat-label">Recent Trades</div>
+                        </div>
+                        {% set buy_trades = trades | selectattr('2', 'equalto', 'buy') | list %}
+                        <div class="stat-card">
+                            <div class="stat-value">{{ buy_trades|length }}</div>
+                            <div class="stat-label">Buy Orders</div>
+                        </div>
+                        {% set sell_trades = trades | selectattr('2', 'equalto', 'sell') | list %}
+                        <div class="stat-card">
+                            <div class="stat-value">{{ sell_trades|length }}</div>
+                            <div class="stat-label">Sell Orders</div>
+                        </div>
+                        {% set unique_traders = trades | map(attribute=0) | unique | list %}
+                        <div class="stat-card">
+                            <div class="stat-value">{{ unique_traders|length }}</div>
+                            <div class="stat-label">Active Traders</div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center p-4">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📈</div>
+                        <h3>No Trading Activity</h3>
+                        <p class="text-secondary">No trades have been executed on the platform yet.</p>
+                    </div>
+                {% endif %}
             </div>
-            
-            {% if history %}
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">{{ history|length }}</div>
-                    <div class="stat-label">Total Trades</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ history|selectattr('action', 'equalto', 'buy')|list|length }}</div>
-                    <div class="stat-label">Buy Orders</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ history|selectattr('action', 'equalto', 'sell')|list|length }}</div>
-                    <div class="stat-label">Sell Orders</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${{ "%.2f"|format(history|sum(attribute='total_amount')) }}</div>
-                    <div class="stat-label">Total Volume</div>
-                </div>
-            </div>
-            
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Date/Time</th>
-                            <th>Trader</th>
-                            <th>Symbol</th>
-                            <th>Company</th>
-                            <th>Action</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Total Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for trade in history %}
-                        <tr>
-                            <td>{{ trade.trade_date }}</td>
-                            <td><strong style="color: #00ff88;">{{ trade.username }}</strong></td>
-                            <td>{{ trade.symbol }}</td>
-                            <td>{{ trade.name }}</td>
-                            <td>
-                                <span class="action-{{ trade.action }}">
-                                    {{ trade.action.upper() }}
-                                </span>
-                            </td>
-                            <td>{{ trade.quantity }}</td>
-                            <td>${{ "%.2f"|format(trade.price) }}</td>
-                            <td>${{ "%.2f"|format(trade.total_amount) }}</td>
-                        </tr>
+
+            {% if trades %}
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Top Trading Symbols</h3>
+                    </div>
+                    <div>
+                        {% set symbol_counts = {} %}
+                        {% for trade in trades %}
+                            {% if symbol_counts.update({trade[1]: symbol_counts.get(trade[1], 0) + 1}) %}{% endif %}
                         {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            
-            <div style="text-align: center; margin-top: 2rem;">
-                <a href="{{ url_for('admin_portfolio') }}" class="btn btn-secondary">View All Portfolios</a>
-                <a href="{{ url_for('admin_manage') }}" class="btn btn-primary" style="margin-left: 1rem;">Manage Users</a>
-            </div>
-            
-            {% else %}
-            <div class="empty-state">
-                <h3>No Trade History</h3>
-                <p>No trades have been executed on the platform yet.</p>
-                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary" style="margin-top: 1rem;">Back to Dashboard</a>
+                        {% for symbol, count in (symbol_counts.items() | list)[:5] %}
+                        <div class="d-flex justify-between align-center p-2 mb-2" style="background: var(--secondary-bg); border-radius: 0.5rem;">
+                            <span><strong>{{ symbol }}</strong></span>
+                            <span class="text-muted">{{ count }} trades</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Most Active Users</h3>
+                    </div>
+                    <div>
+                        {% set user_counts = {} %}
+                        {% for trade in trades %}
+                            {% if user_counts.update({trade[0]: user_counts.get(trade[0], 0) + 1}) %}{% endif %}
+                        {% endfor %}
+                        {% for user, count in (user_counts.items() | list)[:5] %}
+                        <div class="d-flex justify-between align-center p-2 mb-2" style="background: var(--secondary-bg); border-radius: 0.5rem;">
+                            <span><strong>{{ user }}</strong></span>
+                            <span class="text-muted">{{ count }} trades</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
             {% endif %}
-            
-            <div style="background-color: #1e1e1e; padding: 1.5rem; border-radius: 10px; margin-top: 2rem; border: 1px solid #333;">
-                <h4 style="color: #00ff88; margin-bottom: 1rem;">Trade Monitoring</h4>
-                <ul style="color: #cccccc; line-height: 1.8;">
-                    <li><strong>Real-time Monitoring:</strong> All trades are recorded instantly</li>
-                    <li><strong>Complete Audit Trail:</strong> Every trade includes timestamp and details</li>
-                    <li><strong>User Activity:</strong> Monitor individual trader activity</li>
-                    <li><strong>Market Impact:</strong> Track platform-wide trading patterns</li>
-                    <li><strong>Data Export:</strong> All trade data can be exported for analysis</li>
-                </ul>
-            </div>
         </div>
     </main>
 
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2025 Stocker. All rights reserved. - Admin Panel</p>
-        </div>
-    </footer>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
