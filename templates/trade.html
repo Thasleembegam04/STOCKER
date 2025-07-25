@@ -3,125 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trade {{ stock.symbol }} - Stocker</title>
+    <title>Trade - Stocker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <nav class="nav">
-                <a href="/dashboard" class="logo">Stocker</a>
-                <div class="nav-links">
-                    <a href="/dashboard" class="nav-link">Dashboard</a>
-                    <a href="/portfolio" class="nav-link">Portfolio</a>
-                    <a href="/history" class="nav-link">History</a>
-                    <a href="/logout" class="nav-link">Logout ({{ session.username }})</a>
-                </div>
-            </nav>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <span class="logo-icon">📈</span>
+                <a href="{{ url_for('dashboard') }}" style="color: inherit; text-decoration: none;">Stocker</a>
+            </div>
+            
+            <div class="nav-menu-container">
+                <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('trade') }}" class="nav-link active">Trade</a>
+                <a href="{{ url_for('portfolio') }}" class="nav-link">Portfolio</a>
+                <a href="{{ url_for('history') }}" class="nav-link">History</a>
+            </div>
+            
+            <div class="auth-buttons">
+                <span style="color: #cccccc; margin-right: 1rem;">Welcome, {{ session.username }}!</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+            </div>
         </div>
     </header>
 
-    <main class="main-content">
-        <div class="container">
-            <div class="trade-form">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Trade {{ stock.symbol }}</h2>
-                        <a href="/dashboard" class="btn btn-secondary btn-sm">← Back to Dashboard</a>
-                    </div>
-
-                    <div class="stock-info mb-4">
-                        <div class="stock-card" data-symbol="{{ stock.symbol }}">
-                            <div class="stock-symbol">{{ stock.symbol }}</div>
-                            <div class="stock-name">{{ stock.name }}</div>
-                            <div class="stock-price">${{ "%.2f"|format(stock.price) }}</div>
-                            <div class="stock-change {% if stock.change >= 0 %}positive{% else %}negative{% endif %}">
-                                {{ "+" if stock.change >= 0 else "" }}${{ "%.2f"|format(stock.change) }}
-                            </div>
-                        </div>
-                    </div>
-
-                    {% with messages = get_flashed_messages() %}
-                        {% if messages %}
-                            {% for message in messages %}
-                                <div class="alert alert-danger">{{ message }}</div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-
-                    <form method="POST" action="/execute_trade" class="fade-in">
-                        <input type="hidden" name="symbol" value="{{ stock.symbol }}">
-
-                        <div class="form-group">
-                            <label for="action" class="form-label">Action</label>
-                            <select name="action" id="action" class="form-input form-select" required>
-                                <option value="buy">Buy</option>
-                                <option value="sell">Sell</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="quantity" class="form-label">Quantity</label>
-                            <div class="quantity-input">
-                                <button type="button" class="quantity-btn" data-action="decrease">-</button>
-                                <input 
-                                    type="number" 
-                                    id="quantity" 
-                                    name="quantity" 
-                                    class="form-input" 
-                                    value="1" 
-                                    min="1" 
-                                    max="10000"
-                                    style="text-align: center;"
-                                    required
-                                >
-                                <button type="button" class="quantity-btn" data-action="increase">+</button>
-                            </div>
-                        </div>
-
-                        <div class="trade-summary">
-                            <div class="d-flex justify-between mb-2">
-                                <span>Price per share:</span>
-                                <span class="stock-price">${{ "%.2f"|format(stock.price) }}</span>
-                            </div>
-                            <div class="d-flex justify-between mb-2">
-                                <span>Quantity:</span>
-                                <span id="summary-quantity">1</span>
-                            </div>
-                            <div class="d-flex justify-between" style="font-weight: 600; font-size: 1.125rem;">
-                                <span>Total Cost:</span>
-                                <span id="total-cost">${{ "%.2f"|format(stock.price) }}</span>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-full btn-lg">Execute Trade</button>
-                    </form>
-
-                    <div class="card mt-4" style="background: var(--secondary-bg);">
-                        <h4 style="margin-bottom: 1rem;">Trading Information</h4>
-                        <div style="font-size: 0.875rem; color: var(--text-secondary);">
-                            <p><strong>Market Hours:</strong> 24/7 (Virtual Trading)</p>
-                            <p><strong>Settlement:</strong> Instant execution</p>
-                            <p><strong>Fees:</strong> No trading fees</p>
-                            <p><strong>Minimum Order:</strong> 1 share</p>
-                        </div>
+    <main>
+        <div class="trade-container">
+            <h2 style="color: #00ff88; text-align: center; margin-bottom: 2rem;">Execute Trade</h2>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="{{ url_for('execute_trade') }}" id="trade-form">
+                <div class="form-group">
+                    <label for="stock_symbol">Select Stock</label>
+                    <select id="stock_symbol" name="stock_symbol" required>
+                        <option value="">Choose a stock...</option>
+                        {% for symbol, data in stocks.items() %}
+                        <option value="{{ symbol }}" 
+                                {% if request.args.get('symbol') == symbol %}selected{% endif %}>
+                            {{ symbol }} - {{ data.name }} (${{ "%.2f"|format(data.price) }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <div class="quantity-input">
+                        <button type="button" class="quantity-control" data-action="decrease">-</button>
+                        <input type="number" id="quantity" name="quantity" min="1" value="1" required>
+                        <button type="button" class="quantity-control" data-action="increase">+</button>
                     </div>
                 </div>
+                
+                <div class="form-group">
+                    <label>Trade Action</label>
+                    <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="radio" name="action" value="buy" 
+                                   {% if request.args.get('action') == 'buy' %}checked{% endif %} required>
+                            <span style="color: #00ff88;">Buy</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="radio" name="action" value="sell" 
+                                   {% if request.args.get('action') == 'sell' %}checked{% endif %} required>
+                            <span style="color: #ff4444;">Sell</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="trade-summary">
+                    <h3>Trade Summary</h3>
+                    <div class="summary-row">
+                        <span class="summary-label">Stock:</span>
+                        <span class="summary-value" id="summary-symbol">-</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Company:</span>
+                        <span class="summary-value" id="summary-name">-</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Quantity:</span>
+                        <span class="summary-value" id="summary-quantity">-</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Current Price:</span>
+                        <span class="summary-value" id="current-price">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Total Amount:</span>
+                        <span class="summary-value total-amount" id="total-amount">$0.00</span>
+                    </div>
+                </div>
+                
+                <div class="trade-actions">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.2rem;">
+                        Execute Trade
+                    </button>
+                </div>
+            </form>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <p style="color: #cccccc;">
+                    <a href="{{ url_for('dashboard') }}" style="color: #00ff88; text-decoration: none;">← Back to Dashboard</a>
+                </p>
+            </div>
+            
+            <div style="background-color: #5d18dce0; padding: 1.5rem; border-radius: 10px; margin-top: 2rem;">
+                <h4 style="color: #00ff88; margin-bottom: 1rem;">Trading Information</h4>
+                <ul style="color: #cccccc; line-height: 1.8;">
+                    <li>All trades are executed instantly at current market prices</li>
+                    <li>No balance restrictions for demonstration purposes</li>
+                    <li>Stock prices update every 10 seconds</li>
+                    <li>All trades are recorded in your portfolio and history</li>
+                    <li>After execution, you'll be redirected to your portfolio</li>
+                </ul>
             </div>
         </div>
     </main>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <script>
-        // Update summary when quantity changes
-        document.getElementById('quantity').addEventListener('input', function() {
-            const quantity = parseInt(this.value) || 1;
-            const price = {{ stock.price }};
-            const total = quantity * price;
-            
-            document.getElementById('summary-quantity').textContent = quantity;
-            document.getElementById('total-cost').textContent = `$${total.toFixed(2)}`;
-        });
-    </script>
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Stocker. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>
