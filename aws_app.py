@@ -17,7 +17,7 @@ app.secret_key = secrets.token_hex(16)
 AWS_REGION = 'us-east-1'
 AWS_ACCESS_KEY_ID = 'your_access_key'
 AWS_SECRET_ACCESS_KEY = 'your_secret_key'
-SNS_TOPIC_ARN = 'arn:aws:sns:us-east-1:235494817119:stocker'
+SNS_TOPIC_ARN = 'arn:aws:sns:us-east-1:235494817119:stocker1'
 # Initialize AWS services
 dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION,
                          aws_access_key_id=AWS_ACCESS_KEY_ID,
